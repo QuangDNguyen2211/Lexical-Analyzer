@@ -29,6 +29,7 @@ string checkChar(string word)
 
 LinkedList<string> checkWord(string line)
 {
+	int blockComment = 0;
 	string word;
 	string testWord;
 	LinkedList<string> list;
@@ -37,7 +38,12 @@ LinkedList<string> checkWord(string line)
 		testWord.clear();
 		testWord = line[c];
 
-		if (testWord == " ") {
+		if (testWord == "!")
+			++blockComment;
+
+		if (blockComment % 2 != 0)
+			continue;
+		else if (testWord == " ") {
 			if (!word.empty()) {
 				list.push_back(checkChar(word), word);
 				word.clear();
