@@ -27,9 +27,8 @@ string checkChar(string word)
 	}
 }
 
-LinkedList<string> checkWord(string line)
+LinkedList<string> checkWord(string line, int &blockComment)
 {
-	int blockComment = 0;
 	string word;
 	string testWord;
 	LinkedList<string> list;
