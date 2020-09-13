@@ -10,7 +10,7 @@ using namespace std;
 
 int main() {
 
-	int choice;
+	int choice, blockComment = 0;
 	LinkedList<string> list;
 
 	cout << "\t=================================\n"
@@ -29,7 +29,7 @@ int main() {
 			string line;
 			cout << "Input your code: ";
 			getline(cin, line);
-			list = checkWord(line);
+			list = checkWord(line, blockComment);
 		} break;
 		case 2: 
 		{
@@ -47,7 +47,7 @@ int main() {
 				else {
 					string readFile;
 					while (getline(myFile, readFile)) {
-						list = list + checkWord(readFile);
+						list = list + checkWord(readFile, blockComment);
 					}
 				}
 
