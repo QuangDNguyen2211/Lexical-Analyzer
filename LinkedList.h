@@ -6,9 +6,9 @@ class Node
 {
 public:
 	Node(void) {}
-	Node(const T& _data1, const T& _data2, Node* _next);
-	// Node( const Node<T> &source );
-	// Node &operator=( const Node<T> &source );
+	Node(const T& _data1, const T& _data2, Node* _next)
+		: data1(_data1), data2(_data2), next(_next)
+	{};
 	T data1;
 	T data2;
 	Node* next;
@@ -23,25 +23,21 @@ public:
 
 	LinkedList<T>& operator=(const LinkedList<T>& source);
 	~LinkedList();
+	LinkedList(const LinkedList<T>& leftSource, const LinkedList<T>& rightSource);
+	friend LinkedList<T> operator+(const LinkedList& leftSource, const LinkedList& rightSource)
+	{		return LinkedList<T>(leftSource, rightSource);	}
 
-	void push_front(const T& item1, const T& item2);
+	void push_back(const T& item1, const T& item2);
 	T showToken(void);
 	T showLexeme(void);
 	bool isEmpty(void);
 	void pop_front(void);
 	void clear();
-	void reverse();
 
 private:
 	Node<T>* list;
 	void copy(const LinkedList<T>& source);
 };
-
-
-template<class T>
-Node<T>::Node(const T& _data1, const T& _data2, Node<T>* _next)
-	: data1(_data1), data2(_data2), next(_next)
-{}
 
 template<class T>
 LinkedList<T>::LinkedList(void)
@@ -51,7 +47,9 @@ LinkedList<T>::LinkedList(void)
 template<class T>
 LinkedList<T>::LinkedList(const LinkedList<T>& source)
 	: list(nullptr)
-{	copy(source);	}
+{
+	copy(source);
+}
 
 template<class T>
 LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& source)
@@ -62,12 +60,38 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& source)
 
 template<class T>
 LinkedList<T>::~LinkedList()
-{	clear();	}
+{
+	clear();
+}
 
 template<class T>
-void LinkedList<T>::push_front(const T& item1, const T& item2)
+LinkedList<T>::LinkedList(const LinkedList<T>& leftSource, const LinkedList<T>& rightSource)
+	: list(nullptr)
 {
-	list = new Node<T>(item1, item2, list);
+	Node<T>* tempList = nullptr;
+
+	for (Node<T>* ptr = leftSource.list; ptr != nullptr; ptr = ptr->next)
+		push_back(ptr->data1, ptr->data2);
+	for (Node<T>* ptr = rightSource.list; ptr != nullptr; ptr = ptr->next)
+		push_back(ptr->data1, ptr->data2);
+}
+
+template<class T>
+void LinkedList<T>::push_back(const T& item1, const T& item2)
+{
+	if (list == nullptr)
+		list = new Node<T>(item1, item2, nullptr);
+	else
+	{
+		for (Node<T>* previousPtr = list; true; previousPtr = previousPtr->next)
+		{
+			if (previousPtr->next == nullptr)
+			{
+				previousPtr->next = new Node<T>(item1, item2, nullptr);
+				break;
+			}
+		}
+	}
 }
 
 template<class T>
@@ -110,31 +134,11 @@ void LinkedList<T>::clear()
 }
 
 template<class T>
-void LinkedList<T>::reverse()
-{
-	Node<T>* reversed = nullptr;
-	while (list != nullptr)
-	{
-		// remove a node from list
-		Node<T>* aNode = list;
-		list = list->next;
-
-		// link that node onto reversed
-		aNode->next = reversed;
-		reversed = aNode;
-	}
-	list = reversed;
-}
-
-template<class T>
 void LinkedList<T>::copy(const LinkedList<T>& source)
 {
 	clear();
-	// make a reversed copy of source into list
 	for (Node<T>* np = source.list; np != nullptr; np = np->next)
-		// copy each node onto reversed list
-		list = new Node<T>(np->data, list);
-	reverse();
+		push_back(np->data1, np->data2);
 }
 
 #endif
