@@ -1,4 +1,10 @@
-// This is the comment
-while (true) {
+! This is the comment 
+This is another comment !
+while (a == 33) {
    i += 1;
+}
+
+! This is the third comment !
+for (int i = 0; i < a; i++) {
+   sum += i;
 }
