@@ -6,14 +6,15 @@ using namespace std;
 #ifndef LEXICALCHECKING_H
 #define	LEXICALCHECKING_H
 
-string checkChar(string word)
+// Do the lexical analyzer
+string lexer(string word)
 {
 	if (word == "*" || word == "+" || word == "-" || word == "=" || word == "/" || word == ">" || word == "<" || word == "%") {
 		return "OPERATOR";
 	}
 	else if (word == "int" || word == "float" || word == "bool" || word == "true" || word == "false" || word == "if" || word == "else" || word == "then" ||
 		     word == "endif" || word == "while" || word == "do" || word == "for" || word == "input" || word == "output" || word == "and" || word == "or" || 
-			 word == "not" || word == "whileend") {
+			 word == "not" || word == "whileend" || word == "double") {
 		return "KEYWORD";
 	}
 	else if (word == "'" || word == "(" || word == ")" || word == "{" || word == "}" || word == "[" || word == "]" || word == "," ||
@@ -45,41 +46,54 @@ string checkChar(string word)
 			}
 		}
 	}
-		
 	return "IDENTIFIER";
 }
 
+// Break the string into a single character
+// Then take turn to analyze them
 LinkedList<string> checkWord(string line, int &blockComment)
 {
 	string word;
 	string testWord;
 	LinkedList<string> list;
 
+	// Go through each letter of a string
 	for (int c = 0; c < line.length(); c++) {
 		testWord.clear();
 		testWord = line[c];
 
+		// If the character is "!", then the string should be a single or a block comment
 		if (testWord == "!")
 			blockComment++;
 
+		// Ignore all comments
 		if (blockComment == 1 || blockComment == 2) {
 			if (blockComment == 2) {
 				blockComment = 0;
 			}
  			continue;
-		} else if (testWord == " ") {
+		}
+		// If the character is a whitespace, 
+		// then start analyzing by combining all characters before a whitespace into a sub-string
+		// store the lexical analyzer into "list" if any
+		// continue to check the rest character
+		else if (testWord == " ") {
 			if (!word.empty()) {
-				list.push_back(checkChar(word), word);
+				list.push_back(lexer(word), word);
 				word.clear();
 			}
 			continue;
-		} else if (checkChar(testWord) == "OPERATOR") {
+		}
+		// Check if the character is an operator
+		// store the lexical analyzer into "list" if any
+		// continue to check the rest character 
+		else if (lexer(testWord) == "OPERATOR") {
 			if (!word.empty()) {
-				list.push_back(checkChar(word), word);
+				list.push_back(lexer(word), word);
 				word.clear();
 
-				word.push_back(line.at(c));
-				list.push_back(checkChar(word), word);
+				word += line[c];
+				list.push_back(lexer(word), word);
 				word.clear();
 			}
 			else {
@@ -88,40 +102,51 @@ LinkedList<string> checkWord(string line, int &blockComment)
 				word.clear();
 			}
 			continue;
-		} else if (checkChar(testWord) == "SEPARATOR") {
+		}
+		// Check if the character is an separator
+		// store the lexical analyzer into "list" if any
+		// continue to check the rest character
+		else if (lexer(testWord) == "SEPARATOR") {
 			if (!word.empty()) {
 				// Check if the next letter after "." is an integer
 				// If yes, then "." is not a separator in this case
-				// Then we know that the word must be a real number
+				// Then the word must be a real number
 				// Then continue checking the rest number in the next letters of a real number 
 				if (isdigit(line[c + 1])) {
 					word += line[c];
 					continue;
 				}
 				else {
-					list.push_back(checkChar(word), word);
+					list.push_back(lexer(word), word);
 					word.clear();
 
-					word.push_back(line.at(c));
-					list.push_back(checkChar(word), word);
+					word += line[c];
+					list.push_back(lexer(word), word);
 					word.clear();
 				}
 			}
 			else {
-				word.push_back(line.at(c));
+				word += line[c];
 				list.push_back("SEPARATOR", word);
 				word.clear();
 			}
 			continue;
-		} else if (c == line.length() - 1) {
-			word.push_back(line.at(c));
-			list.push_back(checkChar(word), word);
+		}
+		// Check the last character of the string
+		// store the lexical analyzer into "list" if any
+		// continue to check the rest character
+		else if (c == line.length() - 1) {
+			word += line[c];
+			list.push_back(lexer(word), word);
 			word.clear();
 			continue;
 		}
+
+		// Combine characters into a sub-string to do the lexical analyzer
 		word += line[c];
 	}
 
+	// Return all data stored in "list"
 	return list;
 }
 
