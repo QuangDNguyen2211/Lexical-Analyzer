@@ -1,6 +1,18 @@
+/*
+	Members: Vinh Tran
+			 Quang Nguyen
+
+	Course: CPSC 323 - 04
+
+	Professor: Anthony Le
+
+	Assignment 1: Lexical Analyzer
+*/
+
 #ifndef LINKEDLIST_LOCK
 #define LINKEDLIST_LOCK
 
+// Implement the class named "Node"
 template<class T>
 class Node
 {
@@ -14,22 +26,31 @@ public:
 	Node* next;
 };
 
+// Implement the class named "LinkedList"
 template<class T>
 class LinkedList
 {
 public:
+	// Default Constructor
 	LinkedList(void);
+
+	// Non-default Constructor
 	LinkedList(const LinkedList<T>& source);
+	LinkedList(const LinkedList<T>& leftSource, const LinkedList<T>& rightSource);
+
+	// Destructor
+	~LinkedList();
 
 	LinkedList<T>& operator=(const LinkedList<T>& source);
-	~LinkedList();
-	LinkedList(const LinkedList<T>& leftSource, const LinkedList<T>& rightSource);
 	friend LinkedList<T> operator+(const LinkedList& leftSource, const LinkedList& rightSource)
 	{		return LinkedList<T>(leftSource, rightSource);	}
 
-	void push_back(const T& item1, const T& item2);
+	// Getters
 	T showToken(void);
 	T showLexeme(void);
+
+	// Methods
+	void push_back(const T& item1, const T& item2);
 	bool isEmpty(void);
 	void pop_front(void);
 	void clear();
@@ -39,29 +60,18 @@ private:
 	void copy(const LinkedList<T>& source);
 };
 
+// Implement the default constructor
 template<class T>
 LinkedList<T>::LinkedList(void)
 	: list(nullptr)
 {}
 
+// Implement the non-default constructor
 template<class T>
 LinkedList<T>::LinkedList(const LinkedList<T>& source)
 	: list(nullptr)
 {
 	copy(source);
-}
-
-template<class T>
-LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& source)
-{
-	copy(source);
-	return *this;
-}
-
-template<class T>
-LinkedList<T>::~LinkedList()
-{
-	clear();
 }
 
 template<class T>
@@ -76,24 +86,21 @@ LinkedList<T>::LinkedList(const LinkedList<T>& leftSource, const LinkedList<T>& 
 		push_back(ptr->data1, ptr->data2);
 }
 
+// Implement the destructor
 template<class T>
-void LinkedList<T>::push_back(const T& item1, const T& item2)
+LinkedList<T>::~LinkedList()
 {
-	if (list == nullptr)
-		list = new Node<T>(item1, item2, nullptr);
-	else
-	{
-		for (Node<T>* previousPtr = list; true; previousPtr = previousPtr->next)
-		{
-			if (previousPtr->next == nullptr)
-			{
-				previousPtr->next = new Node<T>(item1, item2, nullptr);
-				break;
-			}
-		}
-	}
+	clear();
 }
 
+template<class T>
+LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& source)
+{
+	copy(source);
+	return *this;
+}
+
+// Implement the getters
 template<class T>
 T LinkedList<T>::showToken(void)
 {
@@ -110,6 +117,25 @@ T LinkedList<T>::showLexeme(void)
 		return nullptr;
 	else
 		return (list->data2);
+}
+
+// Implement the member functions or methods
+template<class T>
+void LinkedList<T>::push_back(const T& item1, const T& item2)
+{
+	if (list == nullptr)
+		list = new Node<T>(item1, item2, nullptr);
+	else
+	{
+		for (Node<T>* previousPtr = list; true; previousPtr = previousPtr->next)
+		{
+			if (previousPtr->next == nullptr)
+			{
+				previousPtr->next = new Node<T>(item1, item2, nullptr);
+				break;
+			}
+		}
+	}
 }
 
 template<class T>

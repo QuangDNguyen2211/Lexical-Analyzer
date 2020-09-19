@@ -1,5 +1,15 @@
-#include"tools.h"
+/*
+	Members: Vinh Tran
+			 Quang Nguyen
 
+	Course: CPSC 323 - 04
+
+	Professor: Anthony Le
+
+	Assignment 1: Lexical Analyzer
+*/
+
+#include"tools.h"
 #include<string>
 #include<iostream>
 #include<fstream>
