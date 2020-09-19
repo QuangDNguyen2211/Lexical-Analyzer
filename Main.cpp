@@ -11,7 +11,6 @@
 
 #include "LinkedList.h"
 #include "LexicalChecking.h"
-#include "Tools.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -50,25 +49,33 @@ void saveOutput(LinkedList<string> data) {
 int main() {
 	// Variable for reading user's input for selecting the mode of the lexical analyzer
 	int choice;
-
 	// Design the menu driven for the program
-	// Mode 1: Let user input a partial code and analyze them
-	// Mode 2: Do the lexical analyzer from a specific file
+		// Mode 1: Let user input a partial code and analyze them
+		// Mode 2: Do the lexical analyzer from a specific file
 	cout << "\t=================================\n"
-		 << "\t   WELCOME TO LEXICAL ANALYZER\n"
-		 << "\t=================================\n"
-		 << "\t           MAIN MENU\n"
-		 << "   1. Manual\n"
-		 << "   2. Read from a file\n"
-		 << "   3. Exit\n\n";
+		<< "\t   WELCOME TO LEXICAL ANALYZER\n"
+		<< "\t=================================\n"
+		<< "\t           MAIN MENU\n"
+		<< "   1. Manual\n"
+		<< "   2. Read from a file\n"
+		<< "   3. Exit\n\n";
 
+	cout << "Select your choice [Integer Only]: ";
 	// Get and check user's input
 	// If user inputted '1', the program will be in Mode 1
 	// If user inputted '2', the program will be in Mode 2
 	// If user inputted '3', the program will be terminal
 	// If user's input is bad, ask them to input again
-	choice = getBoundedInt("Select your choice: ", 1, 3);
-
+	while (!(cin >> choice) || (choice != 1 && choice != 2 && choice != 3)) {
+		if (choice < 1 || choice > 3) {
+			cout << "Input invalid.\n";
+			cout << "Select your choice [Integer Only]: ";
+			cin.clear();
+			cin.ignore(1000,'\n');
+		}
+	}
+	cin.ignore();
+	
 	// Variable for counting and checking a single or block comment
 	int blockComment = 0;
 
@@ -125,9 +132,12 @@ int main() {
 				break;
 			}
 		} break;
-		default:
+		default: 
+		{
 			// The program will be terminal when entered '3'
+			cout << "The program was terminated.\n";
 			return 0;
+		}
 	}
 	return 0;
 }

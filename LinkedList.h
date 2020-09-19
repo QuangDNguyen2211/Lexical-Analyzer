@@ -9,9 +9,6 @@
 	Assignment 1: Lexical Analyzer
 */
 
-#ifndef LINKEDLIST_LOCK
-#define LINKEDLIST_LOCK
-
 // Implement the class named "Node"
 template<class T>
 class Node
@@ -41,6 +38,7 @@ public:
 	// Destructor
 	~LinkedList();
 
+	// Operator Overloading
 	LinkedList<T>& operator=(const LinkedList<T>& source);
 	friend LinkedList<T> operator+(const LinkedList& leftSource, const LinkedList& rightSource)
 	{		return LinkedList<T>(leftSource, rightSource);	}
@@ -93,6 +91,7 @@ LinkedList<T>::~LinkedList()
 	clear();
 }
 
+// Implement the operator overloading
 template<class T>
 LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& source)
 {
@@ -166,5 +165,3 @@ void LinkedList<T>::copy(const LinkedList<T>& source)
 	for (Node<T>* np = source.list; np != nullptr; np = np->next)
 		push_back(np->data1, np->data2);
 }
-
-#endif
