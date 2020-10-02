@@ -1,10 +1,10 @@
-! This is the comment 
-This is another comment !
-while (a == 33) {
-   i += 1;
+! Find largest value between two numbers!
+int num1, num2, large$;
+if(num1 > num2)
+{
+	large = num1$;
 }
-
-! This is the third comment !
-for (int i = 0; i < a; i++) {
-   sum += i;
+else
+{
+	large = num2$;
 }

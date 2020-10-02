@@ -1,164 +1,197 @@
 /*
 	Members: Vinh Tran
 			 Quang Nguyen
-
 	Course: CPSC 323 - 04
-
 	Professor: Anthony Le
-
 	Assignment 1: Lexical Analyzer
 */
 
 #include <iostream>
 #include <string>
+#include "Tools.h"
 
 using namespace std;
 
-#ifndef LEXICALCHECKING_H
-#define	LEXICALCHECKING_H
+/*
+	Q = { 0 (ENTRY), 1 (ALPHA), 2 (DIGIT), 3 (REAL) }
+	q0 = 0 (ENTRY)
+*/
+enum FINITE_STATE_MACHINE {
+	ENTRY = 0,
+	ALPHA = 1,
+	DIGIT = 2,
+	REAL = 3,
+};
 
-// Do the lexical analyzer
+/*
+		  |				 ALPHA				    DIGIT				OTHER
+	N:	  | Input:  [a...z][A...Z][$]		   [0...9]				 [.]
+		  | Treat as      0                       1                   2
+__________|______________________________________________________________
+-->   0   |               1                       2                   0
+      1   |				  1					      1					  0
+	  2   |				  0					      2					  3
+	  3   |				  0					      3					  0
+*/
+int state[4][3] = { {ALPHA, DIGIT, ENTRY},
+				    {ALPHA, ALPHA, ENTRY},
+				    {ENTRY , DIGIT, REAL},
+				    {ENTRY , REAL , ENTRY} };
+
+string checkState(int state) {
+	if (state == ALPHA) {
+		return "IDENTIFIER";
+	}
+	else if (state == DIGIT) {
+		return "INTEGER";
+	}
+	else {
+		return "REAL";
+	}
+}
+
+// Check the token of a word or a character
 string lexer(string word)
 {
+	// If the word belongs to and operator, keyword or separator
+	// it will be easily compare
 	if (word == "*" || word == "+" || word == "-" || word == "=" || word == "/" || word == ">" || word == "<" || word == "%") {
 		return "OPERATOR";
 	}
 	else if (word == "int" || word == "float" || word == "bool" || word == "true" || word == "false" || word == "if" || word == "else" || word == "then" ||
-		     word == "endif" || word == "while" || word == "do" || word == "for" || word == "input" || word == "output" || word == "and" || word == "or" || 
-			 word == "not" || word == "whileend" || word == "double") {
+		word == "endif" || word == "while" || word == "do" || word == "for" || word == "input" || word == "output" || word == "and" || word == "or" ||
+		word == "not" || word == "whileend") {
 		return "KEYWORD";
 	}
 	else if (word == "'" || word == "(" || word == ")" || word == "{" || word == "}" || word == "[" || word == "]" || word == "," ||
-		     word == "." || word == ":" || word == ";") {
+		word == "." || word == ":" || word == ";") {
 		return "SEPARATOR";
 	}
+	// This is for checking if the word is an identifier, a real or an int
 	else {
-		// Check "word" if it is an integer
-		// If yes, return "INTEGER"
-		// If no, continue to check "REAL"
-		for (int i = 0; i < word.length(); i++) {
-			if (isdigit(word[i])) {
-				if (i == word.length() - 1) {
-					return "INTEGER";
-				}
-				continue;
+		// Initialize the entry state for FSM
+		int currentState = 0;
+	
+		for (int c = 0; c < word.length(); c++) {
+			int col;
+			if (isalpha(word[c]) || word[c] == '$') {
+				col = 0;
+			}
+			else if (isdigit(word[c])) {
+				col = 1;
 			}
 			else {
-				break;
+				col = 2;
 			}
+			currentState = state[currentState][col];
 		}
-
-		// Check "word" if it is a real
-		// If yes, return "REAL"
-		// If no, "word" can only be "IDENTIFIER"
-		for (int i = 0; i < word.length(); i++) {
-			if (word[i] == '.') {
-				return "REAL";
-			}
-		}
+		return checkState(currentState);
 	}
-	return "IDENTIFIER";
 }
 
-// Break the string into a single character
-// Then take turn to analyze them
-LinkedList<string> checkWord(string line, int &blockComment)
+
+// Check each letter in a string
+LinkedList<string> checkWord(string line, int& blockComment)
 {
 	string word;
 	string testWord;
 	LinkedList<string> list;
 
-	// Go through each letter of a string
 	for (int c = 0; c < line.length(); c++) {
 		testWord.clear();
 		testWord = line[c];
 
-		// If the character is "!", then the string should be a single or a block comment
+		
 		if (testWord == "!")
 			blockComment++;
-
-		// Ignore all comments
+		// If the program see ! and the blockComment variable is not == to 2
+		// it will skip that char
 		if (blockComment == 1 || blockComment == 2) {
 			if (blockComment == 2) {
 				blockComment = 0;
 			}
- 			continue;
+			continue;
 		}
-		// If the character is a whitespace, 
-		// then start analyzing by combining all characters before a whitespace into a sub-string
-		// store the lexical analyzer into "list" if any
-		// continue to check the rest character
-		else if (testWord == " ") {
+
+		// This is to check if the word is not empty and the first char of the word
+		// is not a letter but testWord is then it will do a lexical
+		// checking the word
+		else if (!isEmpty(word) && !isalpha(word[0]) && isalpha(testWord[0])) {
+			list.push_back(lexer(word), word);
+			word.clear();
+		}
+		else if (testWord == " " || testWord == "\t") {
 			if (!word.empty()) {
 				list.push_back(lexer(word), word);
 				word.clear();
 			}
 			continue;
 		}
-		// Check if the character is an operator
-		// store the lexical analyzer into "list" if any
-		// continue to check the rest character 
 		else if (lexer(testWord) == "OPERATOR") {
 			if (!word.empty()) {
 				list.push_back(lexer(word), word);
 				word.clear();
 
-				word += line[c];
-				list.push_back(lexer(word), word);
-				word.clear();
+				list.push_back("OPERATOR", testWord);
 			}
 			else {
-				word += line[c];
-				list.push_back("OPERATOR", word);
-				word.clear();
+				list.push_back("OPERATOR", testWord);
 			}
 			continue;
 		}
-		// Check if the character is an separator
-		// store the lexical analyzer into "list" if any
-		// continue to check the rest character
 		else if (lexer(testWord) == "SEPARATOR") {
 			if (!word.empty()) {
-				// Check if the next letter after "." is an integer
-				// If yes, then "." is not a separator in this case
-				// Then the word must be a real number
-				// Then continue checking the rest number in the next letters of a real number 
-				if (isdigit(line[c + 1])) {
-					word += line[c];
-					continue;
+				if (testWord == ".") {
+					// The program will loop through the word to see if there are any digit on it
+					for (int i = 0; i < word.length(); i++)
+					{
+						// If it found one that is not, it will do the lexical checking for that word
+						// before pushing "." in the list
+						if (!isdigit(word[i]))
+						{
+							list.push_back(lexer(word), word);
+							word.clear();
+
+							list.push_back("SEPARATOR", testWord);
+							break;
+						}
+						// If it reaches the end and no non-digit char is found then it will push "." into word
+						if (i == word.length() - 1)
+						{
+							word += line[c];
+							// If it is at the end of the line then do a lexical checking for the word
+							if (c == line.length() - 1)
+							{
+								list.push_back(lexer(word), word);
+								word.clear();
+							}
+							break;
+						}
+					}
 				}
-				else {
+				// This is for if the testWord is not "."
+				else
+				{
 					list.push_back(lexer(word), word);
 					word.clear();
 
-					word += line[c];
-					list.push_back(lexer(word), word);
-					word.clear();
+					list.push_back("SEPARATOR", testWord);
 				}
 			}
 			else {
-				word += line[c];
-				list.push_back("SEPARATOR", word);
-				word.clear();
+				list.push_back("SEPARATOR", testWord);
 			}
 			continue;
 		}
-		// Check the last character of the string
-		// store the lexical analyzer into "list" if any
-		// continue to check the rest character
-		else if (c == line.length() - 1) {
-			word += line[c];
+
+		// Combine a single checked character of 'testWord' into 'word'
+		word += line[c];
+
+		if (c == line.length() - 1) {
 			list.push_back(lexer(word), word);
 			word.clear();
-			continue;
 		}
-
-		// Combine characters into a sub-string to do the lexical analyzer
-		word += line[c];
 	}
 
-	// Return all data stored in "list"
 	return list;
 }
-
-#endif
