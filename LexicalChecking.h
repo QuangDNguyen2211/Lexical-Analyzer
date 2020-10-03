@@ -11,38 +11,37 @@
 #include "Tools.h"
 
 using namespace std;
-
 /*
 	Q = { 0 (ENTRY), 1 (ALPHA), 2 (DIGIT), 3 (REAL) }
 	q0 = 0 (ENTRY)
 */
 enum FINITE_STATE_MACHINE {
 	ENTRY = 0,
-	ALPHA = 1,
-	DIGIT = 2,
+	IDENTIFIER = 1,
+	INTEGER = 2,
 	REAL = 3,
 };
 
 /*
-		  |				 ALPHA				    DIGIT				OTHER
+		  |				 LETTER				    DIGIT				OTHER
 	N:	  | Input:  [a...z][A...Z][$]		   [0...9]				 [.]
-		  | Treat as      0                       1                   2
+		  | Treat as      l                       d                   .
 __________|______________________________________________________________
 -->   0   |               1                       2                   0
-      1   |				  1					      1					  0
+	  1   |				  1					      1					  0
 	  2   |				  0					      2					  3
 	  3   |				  0					      3					  0
 */
-int state[4][3] = { {ALPHA, DIGIT, ENTRY},
-				    {ALPHA, ALPHA, ENTRY},
-				    {ENTRY , DIGIT, REAL},
-				    {ENTRY , REAL , ENTRY} };
+int state[5][3] = { {IDENTIFIER, INTEGER, REAL},
+					{IDENTIFIER, IDENTIFIER, ENTRY},
+					{ENTRY, INTEGER, REAL},
+					{ENTRY, REAL , ENTRY} };
 
 string checkState(int state) {
-	if (state == ALPHA) {
+	if (state == IDENTIFIER) {
 		return "IDENTIFIER";
 	}
-	else if (state == DIGIT) {
+	else if (state == INTEGER) {
 		return "INTEGER";
 	}
 	else {
@@ -71,17 +70,17 @@ string lexer(string word)
 	else {
 		// Initialize the entry state for FSM
 		int currentState = 0;
-	
+
 		for (int c = 0; c < word.length(); c++) {
 			int col;
-			if (isalpha(word[c]) || word[c] == '$') {
-				col = 0;
+			if (word[c] == '.') {
+				col = 2;
 			}
 			else if (isdigit(word[c])) {
 				col = 1;
 			}
 			else {
-				col = 2;
+				col = 0;
 			}
 			currentState = state[currentState][col];
 		}
@@ -101,7 +100,7 @@ LinkedList<string> checkWord(string line, int& blockComment)
 		testWord.clear();
 		testWord = line[c];
 
-		
+
 		if (testWord == "!")
 			blockComment++;
 		// If the program see ! and the blockComment variable is not == to 2
