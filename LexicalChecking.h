@@ -11,8 +11,9 @@
 #include "Tools.h"
 
 using namespace std;
+
 /*
-	Q = { 0 (ENTRY), 1 (ALPHA), 2 (DIGIT), 3 (REAL) }
+	Q = { 0 (ENTRY), 1 (IDENTIFIER), 2 (INTEGER), 3 (REAL) }
 	q0 = 0 (ENTRY)
 */
 enum FINITE_STATE_MACHINE {
@@ -23,19 +24,18 @@ enum FINITE_STATE_MACHINE {
 };
 
 /*
-		  |				 LETTER				    DIGIT				OTHER
+		  |			    LETTER			        DIGIT				OTHER
 	N:	  | Input:  [a...z][A...Z][$]		   [0...9]				 [.]
-		  | Treat as      l                       d                   .
 __________|______________________________________________________________
 -->   0   |               1                       2                   0
-	  1   |				  1					      1					  0
+      1   |				  1					      1					  0
 	  2   |				  0					      2					  3
 	  3   |				  0					      3					  0
 */
-int state[5][3] = { {IDENTIFIER, INTEGER, REAL},
-					{IDENTIFIER, IDENTIFIER, ENTRY},
-					{ENTRY, INTEGER, REAL},
-					{ENTRY, REAL , ENTRY} };
+int state[4][3] = { {IDENTIFIER, INTEGER, REAL},
+				    {IDENTIFIER, IDENTIFIER, ENTRY},
+				    {ENTRY, INTEGER, REAL},
+				    {ENTRY, REAL , ENTRY} };
 
 string checkState(int state) {
 	if (state == IDENTIFIER) {
@@ -49,30 +49,41 @@ string checkState(int state) {
 	}
 }
 
-// Check the token of a word or a character
-string lexer(string word)
-{
-	// If the word belongs to and operator, keyword or separator
-	// it will be easily compare
+// Check the token of a character if it is an OPERATOR
+bool checkOperator(string word) {
 	if (word == "*" || word == "+" || word == "-" || word == "=" || word == "/" || word == ">" || word == "<" || word == "%") {
-		return "OPERATOR";
+		return true;
 	}
-	else if (word == "int" || word == "float" || word == "bool" || word == "true" || word == "false" || word == "if" || word == "else" || word == "then" ||
+	return false;
+}
+
+// Check the token of a character if it is a SEPARATOR
+bool checkSeparator(string word) {
+	if (word == "'" || word == "(" || word == ")" || word == "{" || word == "}" || word == "[" || word == "]" || word == "," ||
+		word == "." || word == ":" || word == ";") {
+		return true;
+	}
+	return false;
+}
+
+// Check the token of a word if it is an IDENTIFIER, INTEGER, REAL, or KEYWORD
+string lexer(string word)
+{	
+	// Check if 'word' is a KEYWORD
+	if (word == "int" || word == "float" || word == "bool" || word == "true" || word == "false" || word == "if" || word == "else" || word == "then" ||
 		word == "endif" || word == "while" || word == "do" || word == "for" || word == "input" || word == "output" || word == "and" || word == "or" ||
-		word == "not" || word == "whileend") {
+		word == "not" || word == "whileend" || word == "double") {
 		return "KEYWORD";
 	}
-	else if (word == "'" || word == "(" || word == ")" || word == "{" || word == "}" || word == "[" || word == "]" || word == "," ||
-		word == "." || word == ":" || word == ";") {
-		return "SEPARATOR";
-	}
-	// This is for checking if the word is an identifier, a real or an int
+	// Check if 'word' is an IDENTIFIER, INTEGER, REAL
 	else {
+
 		// Initialize the entry state for FSM
 		int currentState = 0;
 
 		for (int c = 0; c < word.length(); c++) {
 			int col;
+
 			if (word[c] == '.') {
 				col = 2;
 			}
@@ -99,8 +110,7 @@ LinkedList<string> checkWord(string line, int& blockComment)
 	for (int c = 0; c < line.length(); c++) {
 		testWord.clear();
 		testWord = line[c];
-
-
+		
 		if (testWord == "!")
 			blockComment++;
 		// If the program see ! and the blockComment variable is not == to 2
@@ -126,7 +136,8 @@ LinkedList<string> checkWord(string line, int& blockComment)
 			}
 			continue;
 		}
-		else if (lexer(testWord) == "OPERATOR") {
+		// Check if 'testWord' is an OPERATOR
+		else if (checkOperator(testWord)) {
 			if (!word.empty()) {
 				list.push_back(lexer(word), word);
 				word.clear();
@@ -138,7 +149,8 @@ LinkedList<string> checkWord(string line, int& blockComment)
 			}
 			continue;
 		}
-		else if (lexer(testWord) == "SEPARATOR") {
+		// Check if 'testWord' is a SEPARATOR
+		else if (checkSeparator(testWord)) {
 			if (!word.empty()) {
 				if (testWord == ".") {
 					// The program will loop through the word to see if there are any digit on it
