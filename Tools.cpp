@@ -9,12 +9,12 @@
 	Assignment 1: Lexical Analyzer
 */
 
-#include"tools.h"
-#include<string>
-#include<iostream>
-#include<fstream>
-#include<sstream>
-#include<time.h>
+#include "Tools.h"
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <time.h>
 using namespace std;
 
 const string WHITESPACE = " \t\n\r";

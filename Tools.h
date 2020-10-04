@@ -9,8 +9,8 @@
 	Assignment 1: Lexical Analyzer
 */
 
-#include<string>
-#include<fstream>
+#include <string>
+#include <fstream>
 using namespace std;
 
 extern const string WHITESPACE;

@@ -32,10 +32,10 @@ __________|______________________________________________________________
 	  2   |				  0					      2					  3
 	  3   |				  0					      3					  0
 */
-int state[4][3] = { {IDENTIFIER, INTEGER, REAL},
-				    {IDENTIFIER, IDENTIFIER, ENTRY},
-				    {ENTRY, INTEGER, REAL},
-				    {ENTRY, REAL , ENTRY} };
+int state[4][3] = { {IDENTIFIER, INTEGER, ENTRY},
+					{IDENTIFIER, IDENTIFIER, ENTRY},
+					{ENTRY, INTEGER, REAL},
+					{ENTRY, REAL , ENTRY} };
 
 string checkState(int state) {
 	if (state == IDENTIFIER) {
@@ -104,14 +104,14 @@ string lexer(string word)
 LinkedList<string> checkWord(string line, int& blockComment)
 {
 	string word;
-	string testWord;
+	string testChar;
 	LinkedList<string> list;
 
 	for (int c = 0; c < line.length(); c++) {
-		testWord.clear();
-		testWord = line[c];
+		testChar.clear();
+		testChar = line[c];
 		
-		if (testWord == "!")
+		if (testChar == "!")
 			blockComment++;
 		// If the program see ! and the blockComment variable is not == to 2
 		// it will skip that char
@@ -125,11 +125,11 @@ LinkedList<string> checkWord(string line, int& blockComment)
 		// This is to check if the word is not empty and the first char of the word
 		// is not a letter but testWord is then it will do a lexical
 		// checking the word
-		else if (!isEmpty(word) && !isalpha(word[0]) && isalpha(testWord[0])) {
+		else if (!isEmpty(word) && !isalpha(word[0]) && isalpha(testChar[0])) {
 			list.push_back(lexer(word), word);
 			word.clear();
 		}
-		else if (testWord == " " || testWord == "\t") {
+		else if (testChar == " " || testChar == "\t") {
 			if (!word.empty()) {
 				list.push_back(lexer(word), word);
 				word.clear();
@@ -137,22 +137,22 @@ LinkedList<string> checkWord(string line, int& blockComment)
 			continue;
 		}
 		// Check if 'testWord' is an OPERATOR
-		else if (checkOperator(testWord)) {
+		else if (checkOperator(testChar)) {
 			if (!word.empty()) {
 				list.push_back(lexer(word), word);
 				word.clear();
 
-				list.push_back("OPERATOR", testWord);
+				list.push_back("OPERATOR", testChar);
 			}
 			else {
-				list.push_back("OPERATOR", testWord);
+				list.push_back("OPERATOR", testChar);
 			}
 			continue;
 		}
 		// Check if 'testWord' is a SEPARATOR
-		else if (checkSeparator(testWord)) {
+		else if (checkSeparator(testChar)) {
 			if (!word.empty()) {
-				if (testWord == ".") {
+				if (testChar == ".") {
 					// The program will loop through the word to see if there are any digit on it
 					for (int i = 0; i < word.length(); i++)
 					{
@@ -163,7 +163,7 @@ LinkedList<string> checkWord(string line, int& blockComment)
 							list.push_back(lexer(word), word);
 							word.clear();
 
-							list.push_back("SEPARATOR", testWord);
+							list.push_back("SEPARATOR", testChar);
 							break;
 						}
 						// If it reaches the end and no non-digit char is found then it will push "." into word
@@ -186,11 +186,11 @@ LinkedList<string> checkWord(string line, int& blockComment)
 					list.push_back(lexer(word), word);
 					word.clear();
 
-					list.push_back("SEPARATOR", testWord);
+					list.push_back("SEPARATOR", testChar);
 				}
 			}
 			else {
-				list.push_back("SEPARATOR", testWord);
+				list.push_back("SEPARATOR", testChar);
 			}
 			continue;
 		}
@@ -198,10 +198,12 @@ LinkedList<string> checkWord(string line, int& blockComment)
 		// Combine a single checked character of 'testWord' into 'word'
 		word += line[c];
 
+		// Check the last character of a string
 		if (c == line.length() - 1) {
 			list.push_back(lexer(word), word);
 			word.clear();
 		}
+		
 	}
 
 	return list;

@@ -11,6 +11,7 @@
 
 #include "LinkedList.h"
 #include "LexicalChecking.h"
+#include "Tools.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
